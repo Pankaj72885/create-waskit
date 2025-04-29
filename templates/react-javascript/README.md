@@ -1,12 +1,50 @@
-# React + Vite
+# React JavaScript Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a template for creating React applications using JavaScript and Bun. It provides a basic setup to help you get started with your React project quickly.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 19+
+- JavaScript
+- Bun for ultra-fast development and building
+- Basic project structure
+- ESLint configuration
+- Standard development tooling
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone this template
+2. Install dependencies:
+```bash
+bun install
+```
+3. Start development server:
+```bash
+bun dev
+```
+
+## Available Scripts
+
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run lint` - Run ESLint
+- `bun run preview` - Preview production build
+- `bun run deploy` - Deploy Github Pages
+
+## Project Structure
+
+```
+├── public/
+├── src/
+│   ├── components/
+│   ├── App.jsx
+│   └── main.jsx
+├── .eslintrc.cjs
+├── index.html
+└── package.json
+```
+
+## License
+
+MIT
+

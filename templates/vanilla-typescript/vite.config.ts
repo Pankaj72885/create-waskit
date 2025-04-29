@@ -1,6 +1,6 @@
 
 import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 // Export the Vite configuration
 export default defineConfig({
   // Add the Tailwind CSS plugin to the Vite build process
