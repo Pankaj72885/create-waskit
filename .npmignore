@@ -1,0 +1,4 @@
+
+# Include template .gitignore files
+!templates/*/.gitignore
+!templates/*/*/.gitignore
