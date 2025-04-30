@@ -4,8 +4,10 @@ A template for creating React applications with TypeScript.
 
 ## Features
 
-- React 19+
+- React 18+
 - TypeScript
+- Tailwind CSS
+- Vite
 - Modern development setup
 - Bun package manager
 

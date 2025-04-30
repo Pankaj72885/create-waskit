@@ -1,6 +1,6 @@
-# Vanilla TypeScript Template
+# Bun Vanilla TypeScript Template
 
-A minimal template for building WebAssembly applications using TypeScript.
+A minimal template for building web applications using Bun, TypeScript, and Tailwind CSS.
 
 ## Prerequisites
 

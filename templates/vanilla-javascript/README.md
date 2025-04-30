@@ -1,12 +1,10 @@
-# Bun vanilla JavaScript Template
+# Bun Vanilla JavaScript Template
 
-This template provides a basic setup for developing WebAssembly applications using Bun and vanilla JavaScript.
+This template provides a basic setup for developing web applications using Bun and vanilla JavaScript with Tailwind CSS.
 
 ## Prerequisites
 
 - [Bun](https://bun.sh/) (latest version recommended)
-- A WebAssembly-compatible browser
-- A C/C++ compiler (if you plan to compile WebAssembly from C/C++)
 
 ## Getting Started
 

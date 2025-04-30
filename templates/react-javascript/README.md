@@ -4,9 +4,11 @@ This is a template for creating React applications using JavaScript and Bun. It 
 
 ## Features
 
-- React 19+
+- React 18+
 - JavaScript
 - Bun for ultra-fast development and building
+- Tailwind CSS
+- Vite
 - Basic project structure
 - ESLint configuration
 - Standard development tooling
@@ -47,4 +49,3 @@ bun dev
 ## License
 
 MIT
-

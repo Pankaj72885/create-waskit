@@ -122,6 +122,12 @@ const createProject = async (projectDirectory, options) => {
     } else {
       console.warn("⚠️ Warning: package.json not found in the template.");
     }
+    
+    // Remove Tailwind CSS if not selected
+    if (cssFramework === "No") {
+      console.log("\n🧹 Removing Tailwind CSS...");
+      await removeTailwind(absoluteProjectPath);
+    }
 
     console.log(
       `\n✅ Project "${projectName}" created successfully with ${language} and ${framework}.`
@@ -280,11 +286,54 @@ async function nodeCopyDir(src, dest) {
   }
 }
 
+/**
+ * Removes Tailwind CSS from the project
+ * @param {string} projectDirectory - The directory of the project
+ */
+async function removeTailwind(projectDirectory) {
+  const fs = await import("fs/promises");
+
+  // Remove Tailwind CSS from index.css
+  const cssPath = path.join(projectDirectory, "src", "index.css");
+  if (existsSync(cssPath)) {
+    await fs.writeFile(cssPath, "", "utf8");
+    console.log("✅ Removed Tailwind CSS from index.css");
+  }
+
+  // Remove Tailwind CSS classes from index.html
+  const htmlPath = path.join(projectDirectory, "index.html");
+  if (existsSync(htmlPath)) {
+    let htmlContent = await fs.readFile(htmlPath, "utf8");
+    htmlContent = htmlContent.replace(/class=".*?"/g, "");
+    await fs.writeFile(htmlPath, htmlContent, "utf8");
+    console.log("✅ Removed Tailwind CSS classes from index.html");
+  }
+
+  // Remove Tailwind CSS plugin from vite.config.js/ts/jsx
+  const viteConfigPaths = [
+    path.join(projectDirectory, "vite.config.js"),
+    path.join(projectDirectory, "vite.config.ts"),
+    path.join(projectDirectory, "vite.config.jsx"),
+  ];
+
+  for (const viteConfigPath of viteConfigPaths) {
+    if (existsSync(viteConfigPath)) {
+      let viteConfigContent = await fs.readFile(viteConfigPath, "utf8");
+      viteConfigContent = viteConfigContent.replace(/import tailwindcss\/vite from 'tailwindcss\/vite';\n?/g, "");
+      viteConfigContent = viteConfigContent.replace(/import tailwindcss from "@tailwindcss\/vite";\n?/g, "");
+      viteConfigContent = viteConfigContent.replace(/tailwindcss\/vite\(\)/g, "");
+      viteConfigContent = viteConfigContent.replace(/tailwindcss\(\)/g, "");
+      await fs.writeFile(viteConfigPath, viteConfigContent, "utf8");
+      console.log(`✅ Removed Tailwind CSS plugin from ${path.basename(viteConfigPath)}`);
+    }
+  }
+}
+
 // Set up CLI commands and options
 program
   .name("create-waskit")
   .description("WASKit (Web App Starter Kit) - Create modern web projects with minimal setup")
-  .version("0.0.7");
+  .version("0.0.8");
 
 program
   .argument("[project-directory]", "Directory for the new project")
