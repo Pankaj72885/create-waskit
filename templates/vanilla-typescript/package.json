@@ -4,18 +4,16 @@
   "version": "0.0.6",
   "type": "module",
   "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build",
-    "preview": "bunx --bun vite preview",
-    "predeploy": "bunx --bun vite build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "vite build",
     "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.4",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
     "tsx": "^4.19.4",
     "eslint": "^9.25.1",
     "eslint-config-prettier": "^10.1.2"

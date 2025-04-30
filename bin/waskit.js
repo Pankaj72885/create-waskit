@@ -63,14 +63,6 @@ const createProject = async (projectDirectory, options) => {
       framework = templateParts[0];
       language = templateParts[1];
       cssFramework = "Yes"; // Assume Tailwind CSS is included
-
-      const templateDir = path.resolve(__dirname, "..", "templates", template);
-      if (!existsSync(templateDir)) {
-        console.error(`❌ Error: Template "${template}" not found.`);
-        process.exit(1);
-      }
-
-      console.log(`\nUsing template: ${template}`);
     } else {
       // Prompt user for template choices.
       const {
@@ -105,25 +97,18 @@ const createProject = async (projectDirectory, options) => {
 
       // Determine the template directory using package-relative path.
       template = `${framework.toLowerCase()}-${language.toLowerCase()}`;
-
-      // Validate the template name
-      const templateDir = path.resolve(__dirname, "..", "templates", template);
-      if (!existsSync(templateDir)) {
-        console.error(`❌ Error: Template "${template}" not found.`);
-        process.exit(1);
-      }
     }
-    // Resolve the template directory path.
-    const templateDir = path.resolve(__dirname, "..", "templates", template);
 
+    // Resolve the template directory path and validate it exists
+    const templateDir = path.resolve(__dirname, "..", "templates", template);
     console.log(`\n🔍 Looking for template at: ${templateDir}`);
 
     if (!existsSync(templateDir)) {
-      console.error(
-        `❌ Error: Template directory "${template}" not found at ${templateDir}`
-      );
+      console.error(`❌ Error: Template "${template}" not found.`);
       process.exit(1);
     }
+
+    console.log(`\nUsing template: ${template}`);
 
     // Create project directory if it doesn't exist.
     if (!existsSync(absoluteProjectPath)) {
@@ -190,7 +175,7 @@ const createProject = async (projectDirectory, options) => {
     if (options.git) {
       console.log("\n🔄 Initializing git repository...");
       try {
-        const result = spawnSync("bun", ["x", "git", "init"], {
+        const result = spawnSync("git", ["init"], {
           cwd: absoluteProjectPath,
           stdio: "inherit",
           shell: true,
@@ -199,7 +184,7 @@ const createProject = async (projectDirectory, options) => {
           throw new Error("Git init failed");
         }
 
-        const addResult = spawnSync("bun", ["x", "git", "add", "."], {
+        const addResult = spawnSync("git", ["add", "."], {
           cwd: absoluteProjectPath,
           stdio: "inherit",
           shell: true,
@@ -209,8 +194,8 @@ const createProject = async (projectDirectory, options) => {
         }
 
         const commitResult = spawnSync(
-          "bun",
-          ["x", "git", "commit", "-m", "Initial commit"],
+          "git",
+          ["commit", "-m", "Initial commit"],
           {
             cwd: absoluteProjectPath,
             stdio: "inherit",
@@ -229,7 +214,7 @@ const createProject = async (projectDirectory, options) => {
     }
 
     // Install dependencies if not skipped.
-    if (options.skipInstall) {
+    if (!options.skipInstall) {
       console.log("\n📦 Installing dependencies...");
 
       try {
@@ -251,20 +236,20 @@ const createProject = async (projectDirectory, options) => {
           "⚠️ Bun not found or installation failed. Falling back to npm..."
         );
 
-        const npmInstall = Bun.spawn(["npm", "install"], {
-          cwd: absoluteProjectPath,
-          stdio: "pipe",
-        });
+        try {
+          // Use Node.js child_process for npm
+          const npmResult = spawnSync("npm", ["install"], {
+            cwd: absoluteProjectPath,
+            stdio: "inherit",
+            shell: true,
+          });
 
-        const npmResult = await npmInstall.exited;
-
-        if (npmResult !== 0) {
-          const decoder = new TextDecoder();
-          const errorText = decoder.decode(
-            await npmInstall.stderr.arrayBuffer()
-          );
+          if (npmResult.status !== 0) {
+            throw new Error("npm install failed");
+          }
+        } catch (npmError) {
           console.error(
-            `❌ Failed to install dependencies. Please run 'npm install' manually. Error:\n${errorText}`
+            `❌ Failed to install dependencies. Please run 'npm install' manually. Error: ${npmError.message}`
           );
         }
       }
@@ -275,7 +260,7 @@ const createProject = async (projectDirectory, options) => {
     // Show next steps.
     console.log("\n🎉 Project setup complete! Next steps:");
     console.log(`  cd ${projectDirectory}`);
-    console.log("  bun run dev");
+    console.log(`  ${isBun ? "bun run dev" : "npm run dev"}`);
     console.log(
       "\n📚 For more information, check out the README.md file in your project directory."
     );
@@ -288,7 +273,7 @@ const createProject = async (projectDirectory, options) => {
 /**
  * Lists all available templates
  */
-const listTemplates = () => {
+const listTemplates = async () => {
   const templatesDir = path.resolve(__dirname, "..", "templates");
 
   if (!existsSync(templatesDir)) {
@@ -298,15 +283,16 @@ const listTemplates = () => {
 
   try {
     const templates = [];
-    const fs = require("fs");
-    const dirs = fs.readdirSync(templatesDir);
+    const fs = await import("fs/promises");
+    const dirs = await fs.readdir(templatesDir);
 
-    dirs.forEach((dir) => {
+    for (const dir of dirs) {
       const templatePath = path.join(templatesDir, dir);
-      if (fs.statSync(templatePath).isDirectory()) {
+      const stat = await fs.stat(templatePath);
+      if (stat.isDirectory()) {
         templates.push(dir);
       }
-    });
+    }
 
     console.log("\n📋 Available templates:");
     templates.forEach((template) => {
@@ -321,39 +307,17 @@ const listTemplates = () => {
 
 /**
  * Helper function to recursively copy directories
- * Uses Bun's file operations when available, falls back to Node.js fs
+ * Uses a more reliable approach that works with both Bun and Node.js
  * @param {string} src - Source directory
  * @param {string} dest - Destination directory
  */
 async function copyDir(src, dest) {
-  if (isBun) {
-    // Use Bun's file system operations if available
-    try {
-      // Create destination directory
-      mkdirSync(dest, { recursive: true });
-
-      // Read source directory
-      const entries = await Bun.file(src).directory();
-
-      // Process each entry
-      for (const [name, type] of Object.entries(entries)) {
-        const srcPath = path.join(src, name);
-        const destPath = path.join(dest, name);
-
-        if (type === "directory") {
-          await copyDir(srcPath, destPath);
-        } else {
-          const content = await Bun.file(srcPath).arrayBuffer();
-          await Bun.write(destPath, content);
-        }
-      }
-    } catch (error) {
-      // Fall back to Node.js implementation if Bun's API fails
-      await nodeCopyDir(src, dest);
-    }
-  } else {
-    // Use Node.js implementation
+  try {
+    // Always use the Node.js implementation as it's more reliable
     await nodeCopyDir(src, dest);
+  } catch (error) {
+    console.error(`Error copying directory: ${error.message}`);
+    process.exit(1);
   }
 }
 
@@ -386,11 +350,19 @@ async function nodeCopyDir(src, dest) {
 async function removeTailwind(projectDirectory) {
   const fs = await import("fs/promises");
 
-  // Remove Tailwind CSS from index.css
-  const cssPath = path.join(projectDirectory, "src", "index.css");
-  if (existsSync(cssPath)) {
-    await fs.writeFile(cssPath, "", "utf8");
-    console.log("✅ Removed Tailwind CSS from index.css");
+  // Remove Tailwind CSS from CSS files (index.css or style.css)
+  const cssPaths = [
+    path.join(projectDirectory, "src", "index.css"),
+    path.join(projectDirectory, "src", "style.css"),
+  ];
+
+  for (const cssPath of cssPaths) {
+    if (existsSync(cssPath)) {
+      let cssContent = await fs.readFile(cssPath, "utf8");
+      cssContent = cssContent.replace(/@import ['"]tailwindcss['"];?/g, "");
+      await fs.writeFile(cssPath, cssContent, "utf8");
+      console.log(`✅ Removed Tailwind CSS from ${path.basename(cssPath)}`);
+    }
   }
 
   // Remove Tailwind CSS classes from index.html
@@ -412,19 +384,30 @@ async function removeTailwind(projectDirectory) {
   for (const viteConfigPath of viteConfigPaths) {
     if (existsSync(viteConfigPath)) {
       let viteConfigContent = await fs.readFile(viteConfigPath, "utf8");
+
+      // Remove Tailwind CSS imports (handling different import patterns)
       viteConfigContent = viteConfigContent.replace(
-        /import tailwindcss\/vite from 'tailwindcss\/vite';\n?/g,
+        /import tailwindcss(?:\/vite)? from ['"](?:@tailwindcss\/vite|tailwindcss(?:\/vite)?)['"];\n?/g,
         ""
       );
+
+      // Remove Tailwind CSS plugin from plugins array
+      viteConfigContent = viteConfigContent.replace(/tailwindcss\(\),?/g, "");
       viteConfigContent = viteConfigContent.replace(
-        /import tailwindcss from "@tailwindcss\/vite";\n?/g,
+        /tailwindcss\/vite\(\),?/g,
         ""
       );
+
+      // Clean up empty plugins array if needed
       viteConfigContent = viteConfigContent.replace(
-        /tailwindcss\/vite\(\)/g,
-        ""
+        /plugins: \[\s*,?\s*\]/g,
+        "plugins: []"
       );
-      viteConfigContent = viteConfigContent.replace(/tailwindcss\(\)/g, "");
+      viteConfigContent = viteConfigContent.replace(
+        /plugins: \[\s*,\s*]/g,
+        "plugins: []"
+      );
+
       await fs.writeFile(viteConfigPath, viteConfigContent, "utf8");
       console.log(
         `✅ Removed Tailwind CSS plugin from ${path.basename(viteConfigPath)}`
@@ -439,7 +422,7 @@ program
   .description(
     "WASKit (Web App Starter Kit) - Create modern web projects with minimal setup"
   )
-  .version("0.0.11");
+  .version("0.0.12");
 
 program
   .argument("[project-directory]", "Directory for the new project")
@@ -450,23 +433,25 @@ program
     "-t, --template <template>",
     "Specify a template to use (e.g., react-javascript)"
   )
-  .action((projectDirectory, options) => {
+  .action(async (projectDirectory, options) => {
     if (!projectDirectory) {
       // Use default template if not provided
       options.template = "react-javascript";
-      createProject(".", options);
+      await createProject(".", options);
     } else {
       // Set default template if not provided
       if (!options.template) {
         options.template = "react-javascript";
       }
-      createProject(projectDirectory, options);
+      await createProject(projectDirectory, options);
     }
   });
 
 program
   .command("list")
   .description("List all available templates")
-  .action(listTemplates);
+  .action(async () => {
+    await listTemplates();
+  });
 
 program.parse(process.argv);
