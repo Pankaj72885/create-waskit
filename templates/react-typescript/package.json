@@ -1,7 +1,7 @@
 {
   "name": "waskit-react-ts",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vite",
@@ -17,7 +17,7 @@
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.4",
     "typescript": "~5.8.3",
-    "vite": "^6.3.3"
+    "vite": "^6.3.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",

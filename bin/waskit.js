@@ -8,62 +8,28 @@ import * as fs from "fs/promises";
 import { existsSync } from "fs"; // existsSync is still synchronous
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import chalk from "chalk";
-import { performance } from "perf_hooks";
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Utility function to validate project name
-function isValidProjectName(name) {
-  return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(name);
-}
-
-// Utility function for error handling
-class CLIError extends Error {
-  constructor(message, code = 1) {
-    super(message);
-    this.code = code;
-  }
-}
-
 const createProject = async (projectDirectory) => {
-  const startTime = performance.now();
   const projectName = path.basename(projectDirectory);
 
   try {
-    // Validate project name format
-    if (!isValidProjectName(projectName)) {
-      throw new CLIError(
-        "Project name must be lowercase with optional hyphens (e.g., my-project)"
-      );
-    }
-
-    // Check if project directory already exists
-    if (existsSync(projectDirectory)) {
-      throw new CLIError(
-        `Directory "${projectDirectory}" already exists. Please choose a different name.`
-      );
-    }
-
-    console.log(chalk.blue(`\n🚀 Creating new project: ${projectName}\n`));
-
     // Prompt user for template choices
     const { language, framework } = await inquirer.prompt([
       {
         type: "list",
         name: "language",
-        message: chalk.cyan("Select a programming language:"),
+        message: "Select a programming language:",
         choices: ["JavaScript", "TypeScript"],
-        default: "JavaScript"
       },
       {
         type: "list",
         name: "framework",
-        message: chalk.cyan("Select a framework:"),
+        message: "Select a framework:",
         choices: ["Vanilla", "React"],
-        default: "Vanilla"
       },
     ]);
 
@@ -71,20 +37,15 @@ const createProject = async (projectDirectory) => {
     const template = `${framework.toLowerCase()}-${language.toLowerCase()}`;
     const templateDir = path.resolve(__dirname, "..", "templates", template);
 
+    console.log(`Looking for template at: ${templateDir}`);
+
     if (!existsSync(templateDir)) {
-      const availableTemplates = ["Vanilla-JavaScript", "Vanilla-TypeScript", "React-JavaScript", "React-TypeScript"]
-        .map(t => chalk.yellow(t))
-        .join("\n  ");
-      
-      throw new CLIError(
-        `Template "${chalk.red(template)}" not found. Available templates:\n  ${availableTemplates}`
-      );
+      console.error(`Error: Template "${template}" not found.`);
+      process.exit(1);
     }
 
-    console.log(chalk.cyan(`\n📁 Using template: ${template}`));
-
     // Copy template files to the project directory
-    console.log(chalk.cyan(`\n COPYING FILES...`));
+    console.log(`Creating project in "${projectDirectory}"...`);
     await copyDir(templateDir, projectDirectory);
 
     // Update package.json with the project name
@@ -93,34 +54,30 @@ const createProject = async (projectDirectory) => {
       const packageJsonText = await fs.readFile(packageJsonPath, "utf8");
       const packageJson = JSON.parse(packageJsonText);
       packageJson.name = projectName;
-      packageJson.description = `Project generated with create-waskit using ${language} and ${framework}`;
       await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
     } else {
-      console.warn(chalk.yellow("Warning: package.json not found in the template."));
+      console.warn("Warning: package.json not found in the template.");
     }
 
-    console.log(chalk.green(`\n✅ Project "${projectName}" created successfully with ${language} and ${framework}.`));
+    console.log(
+      `Project "${projectName}" created successfully with ${language} and ${framework}.`
+    );
 
     // Install dependencies
-    console.log(chalk.cyan(`\n INSTALLING DEPENDENCIES...`));
+    console.log("Installing dependencies...");
     try {
       execSync("bun --version", { stdio: "ignore" });
-      console.log(chalk.magenta("Using Bun to install dependencies..."));
+      console.log("Using Bun to install dependencies...");
       execSync(`cd ${projectDirectory} && bun install`, { stdio: "inherit" });
     } catch {
-      console.log(chalk.yellow("Bun not found. Falling back to npm..."));
+      console.log("Bun not found. Falling back to npm...");
       execSync(`cd ${projectDirectory} && npm install`, { stdio: "inherit" });
     }
 
-    const duration = ((performance.now() - startTime) / 1000).toFixed(1);
-    console.log(chalk.green(`\n🎉 Project setup completed in ${duration} seconds!`));
-    console.log(chalk.cyan(`\nNext steps:`));
-    console.log(chalk.white(`1. cd ${projectName}`));
-    console.log(chalk.white(`2. bun run dev  # or npm run dev if using npm`));
-    console.log(chalk.white(`3. Start building your application!`));
+    console.log("Dependencies installed successfully.");
   } catch (error) {
-    console.error(chalk.red(`\n❌ Error: ${error.message}`));
-    process.exit(error.code || 1);
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
   }
 };
 
@@ -142,15 +99,8 @@ async function copyDir(src, dest) {
 }
 
 program
-  .version("0.0.3")
-  .description("Create a new web project with Vite and Tailwind CSS")
-  .argument("<project-directory>", "Name of the project directory")
-  .action(createProject)
-  .on("--help", () => {
-    console.log(chalk.cyan(`\nExample usage:`));
-    console.log(chalk.white(`  $ create-waskit my-project`));
-    console.log(chalk.white(`  $ bun create waskit my-project`));
-    console.log(chalk.white(`  $ npm create waskit my-project`));
-  });
+  .version("0.0.5")
+  .argument("<project-directory>", "Directory for the new project")
+  .action(createProject);
 
 program.parse(process.argv);

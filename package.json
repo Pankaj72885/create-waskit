@@ -1,6 +1,6 @@
 {
   "name": "create-waskit",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "WASKit (Web App Starter Kit) is a command-line tool designed to streamline the setup of modern web projects. It scaffolds new projects with Vite and Tailwind CSS, offering flexible templates for JavaScript or TypeScript, with options for Vanilla or React setups. This tool enables developers to kickstart their projects with minimal configuration.",
   "keywords": [
     "waskit",
@@ -34,9 +34,9 @@
     "inquirer": "^12.6.0"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
+    "eslint": "^9.25.1",
     "jest": "^29.7.0",
-    "prettier": "^3.2.4"
+    "prettier": "^3.5.3"
   },
   "type": "module",
   "files": [

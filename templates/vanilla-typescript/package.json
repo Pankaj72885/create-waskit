@@ -1,7 +1,7 @@
 {
   "name": "waskit-vanilla-ts",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vite",
@@ -12,16 +12,14 @@
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.3",
-    "@types/react": "^18.2.59",
-    "@types/react-dom": "^18.2.24",
-    "tsx": "^4.12.1"
+    "typescript": "^5.8.3",
+    "vite": "^6.3.4",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "tsx": "^4.19.4"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
-    "tailwindcss": "^4.1.4",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.3"
+    "tailwindcss": "^4.1.4"
   }
 }
