@@ -54,12 +54,16 @@ bun run dev
 | `-f, --force`         | Overwrite target directory if it exists          |
 | `-s, --skip-install`  | Skip dependency installation                     |
 | `-g, --git`           | Initialize git repository                        |
+| `-t, --template <template>` | Specify a template to use (e.g., react-javascript) |
 | `list`                | List all available templates                     |
 
 Examples:
 ```bash
 # Create a project with git initialization
 bun create waskit my-project --git
+
+# Create a project using a specific template
+bun create waskit my-project --template react-typescript
 
 # Create a project and overwrite existing directory
 bun create waskit my-project --force
@@ -145,10 +149,14 @@ Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and read our [Contributi
 
 Having issues or have suggestions? We'd love to hear from you!
 
-- 🐛 [Open an issue](https://github.com/pankajbepari/create-waskit/issues) for bugs
-- 💡 [Request features](https://github.com/pankajbepari/create-waskit/discussions) 
-- 🆘 [Ask for help](https://github.com/pankajbepari/create-waskit/discussions) in our discussions
+- 🐛 [Open an issue](https://github.com/pankaj72885/create-waskit/issues) for bugs
+- 💡 [Request features](https://github.com/pankaj72885/create-waskit/discussions) 
+- 🆘 [Ask for help](https://github.com/pankaj72885/create-waskit/discussions) in our discussions
 - 📣 [Report security issues](SECURITY.md) directly to maintainers
+
+## Getting Started
+
+For a more detailed guide on how to get started with WASKit, please see the [GETTING_STARTED.md](GETTING_STARTED.md) file.
 
 ## License
 

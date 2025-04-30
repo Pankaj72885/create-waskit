@@ -41,7 +41,7 @@ bun dev
 │   ├── components/
 │   ├── App.jsx
 │   └── main.jsx
-├── .eslintrc.cjs
+├── eslint.config.js
 ├── index.html
 └── package.json
 ```

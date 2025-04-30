@@ -1,4 +1,19 @@
-
 # Include template .gitignore files
 !templates/*/.gitignore
 !templates/*/*/.gitignore
+
+# Ignore development dependencies
+devDependencies
+
+# Ignore configuration files
+.vscode
+.idea
+
+# Ignore lockfiles
+bun.lock
+package-lock.json
+npm-shrinkwrap.json
+yarn.lock
+
+# Ignore other files
+.DS_Store

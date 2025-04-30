@@ -8,11 +8,14 @@
     "build": "bunx --bun vite build",
     "preview": "bunx --bun vite preview",
     "predeploy": "bunx --bun vite build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "lint": "eslint . --ext .js,.jsx"
   },
   "devDependencies": {
     "gh-pages": "^6.0.0",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0"
   },
   "dependencies": {
     "@tailwindcss/vite": "^5.0.0",

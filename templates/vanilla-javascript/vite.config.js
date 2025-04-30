@@ -6,5 +6,5 @@ export default defineConfig({
   plugins: [tailwindcss()],
 
   // Set the base path for the application when deployed to GitHub Pages
-  base: "/waskit-vanilla-js/", //Change it with yout github repo name
+  base: "/",
 });

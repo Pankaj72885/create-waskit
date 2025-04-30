@@ -34,6 +34,19 @@ bun dev
 - `bun run preview` - Preview production build
 - `bun run deploy` - Deploy Github Pages
 
+## Project Structure
+
+```
+├── public/
+├── src/
+│   ├── components/
+│   ├── App.tsx
+│   └── main.tsx
+├── eslint.config.js
+├── index.html
+└── package.json
+```
+
 ## License
 
 MIT
