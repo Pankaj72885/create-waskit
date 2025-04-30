@@ -1,6 +1,6 @@
 {
   "name": "create-waskit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "WASKit (Web App Starter Kit) is a command-line tool designed to streamline the setup of modern web projects. It scaffolds new projects with Vite and Tailwind CSS, offering flexible templates for JavaScript or TypeScript, with options for Vanilla or React setups. This tool enables developers to kickstart their projects with minimal configuration.",
   "keywords": [
     "waskit",
@@ -16,16 +16,18 @@
     "scaffolding",
     "Web App Starter Kit",
     "pankaj",
-    "templates"
+    "templates",
+    "bun"
   ],
   "bin": {
     "create-waskit": "./bin/waskit.js"
   },
   "scripts": {
-    "test": "jest",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "version": "node bin/waskit.js --version"
+    "test": "bun test",
+    "lint": "bun run eslint .",
+    "format": "bun run prettier --write .",
+    "version": "bun run bin/waskit.js --version",
+    "list-templates": "bun run bin/waskit.js list"
   },
   "author": "Pankaj Bepari",
   "license": "MIT",
@@ -51,5 +53,12 @@
   },
   "bugs": {
     "url": "https://github.com/pankajbepari/create-waskit/issues"
-  }
+  },
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=18.0.0"
+  },
+  "trustedDependencies": [
+    "bun"
+  ]
 }

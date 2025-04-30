@@ -3,9 +3,10 @@
 `create-waskit` (Web App Starter Kit) is a **professional-grade CLI tool** for modern web development. It empowers developers to scaffold production-ready projects in seconds with:
 
 - ✅ **Vite** for lightning-fast builds
-- ✅ **Tailwind CSS** for utility-first styling
+- ✅ **Tailwind CSS** for utility-first styling (optional)
 - ✅ Flexible templates for JavaScript/TypeScript with Vanilla/React
 - ✅ Smart dependency management with Bun/NPM
+- ✅ Enhanced Bun integration for optimal performance
 
 This tool is designed for developers who value speed, modern tooling, and clean project structure.
 
@@ -14,11 +15,12 @@ This tool is designed for developers who value speed, modern tooling, and clean 
 | ✨ Feature                | Description                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
 | **Blazing Fast Setup**    | Scaffold projects in seconds with optimized templates                       |
-| **Modern Tech Stack**     | Built with Vite & Tailwind CSS for modern web development                   |
+| **Modern Tech Stack**     | Built with Vite & optional Tailwind CSS for modern web development          |
 | **Flexible Templates**    | 4 production-ready templates: Vanilla/React × JS/TS                         |
 | **Smart Dependency Flow** | Uses Bun by default, falls back to NPM with automatic installation          |
 | **Developer Experience**  | Rich CLI interface with progress indicators and success summaries           |
 | **Cross-Platform**        | Works seamlessly on macOS, Linux, and Windows                               |
+| **Git Integration**       | Optional automatic Git repository initialization                            |
 
 ## Installation
 
@@ -45,15 +47,37 @@ cd my-project
 bun run dev
 ```
 
+### Command Line Options
+
+| Option                | Description                                      |
+|-----------------------|--------------------------------------------------|
+| `-f, --force`         | Overwrite target directory if it exists          |
+| `-s, --skip-install`  | Skip dependency installation                     |
+| `-g, --git`           | Initialize git repository                        |
+| `list`                | List all available templates                     |
+
+Examples:
+```bash
+# Create a project with git initialization
+bun create waskit my-project --git
+
+# Create a project and overwrite existing directory
+bun create waskit my-project --force
+
+# List all available templates
+bun create waskit list
+```
+
 ### Interactive Setup
 1. Select your stack:
    - 🔹 Language: JavaScript or TypeScript
    - 🔹 Framework: Vanilla or React
+   - 🔹 CSS Framework: Include Tailwind CSS or not
 
 2. Watch as create-waskit:
    - 📁 Creates project structure
    - 📦 Installs dependencies
-   - 🛠️  Configures Vite & Tailwind
+   - 🛠️  Configures Vite & Tailwind (if selected)
    - 🚀 Provides next steps
 
 ### Development Workflow
@@ -64,8 +88,11 @@ bun run dev
 # Build for production
 bun run build
 
-# Watch Tailwind CSS changes (optional)
-bun run tailwind
+# Preview production build
+bun run preview
+
+# Deploy to GitHub Pages (if configured)
+bun run deploy
 ```
 
 🌐 Visit [http://localhost:5173](http://localhost:5173) to see your project
@@ -77,17 +104,18 @@ We offer four professionally-crafted templates:
 ### 📦 Available Templates
 | Template              | Tech Stack                     | Use Case                          |
 |-----------------------|--------------------------------|-----------------------------------|
-| Vanilla JavaScript    | HTML + JS + Tailwind            | Lightweight projects              |
-| Vanilla TypeScript    | HTML + TS + Tailwind            | Type-safe vanilla projects        |
-| React JavaScript      | React 18 + JSX + Tailwind       | Modern React applications         |
-| React TypeScript      | React 18 + TSX + Tailwind       | Scalable type-safe React apps     |
+| Vanilla JavaScript    | HTML + JS + Tailwind (optional) | Lightweight projects              |
+| Vanilla TypeScript    | HTML + TS + Tailwind (optional) | Type-safe vanilla projects        |
+| React JavaScript      | React 19 + JSX + Tailwind (optional) | Modern React applications         |
+| React TypeScript      | React 19 + TSX + Tailwind (optional) | Scalable type-safe React apps     |
 
 ### 🧱 Template Structure
 All templates include:
 - ✅ Vite configuration optimized for performance
-- ✅ Tailwind CSS with default theme
+- ✅ Tailwind CSS with default theme (if selected)
 - ✅ Modern ES module setup
 - ✅ Development and production scripts
+- ✅ GitHub Pages deployment configuration
 - ✅ Basic project structure with best practices
 
 ## System Requirements
@@ -106,7 +134,7 @@ We welcome contributions from the community! Here's how to get started:
 
 1. 🍴 Fork the repository
 2. 🌿 Create a feature branch (`git checkout -b feature/amazing-thing`)
-3. 🧪 Test your changes (`npm test`)
+3. 🧪 Test your changes (`bun test`)
 4. 📝 Commit your changes (`git commit -m 'Add amazing thing'`)
 5. 📤 Push to your branch (`git push origin feature/amazing-thing`)
 6. 📣 Create a pull request with detailed description
@@ -117,9 +145,9 @@ Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and read our [Contributi
 
 Having issues or have suggestions? We'd love to hear from you!
 
-- 🐛 [Open an issue](https://github.com/pankaj72885/create-waskit/issues) for bugs
-- 💡 [Request features](https://github.com/pankaj72885/create-waskit/discussions) 
-- 🆘 [Ask for help](https://github.com/pankaj72885/create-waskit/discussions) in our discussions
+- 🐛 [Open an issue](https://github.com/pankajbepari/create-waskit/issues) for bugs
+- 💡 [Request features](https://github.com/pankajbepari/create-waskit/discussions) 
+- 🆘 [Ask for help](https://github.com/pankajbepari/create-waskit/discussions) in our discussions
 - 📣 [Report security issues](SECURITY.md) directly to maintainers
 
 ## License
