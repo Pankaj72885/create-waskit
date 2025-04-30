@@ -333,7 +333,7 @@ async function removeTailwind(projectDirectory) {
 program
   .name("create-waskit")
   .description("WASKit (Web App Starter Kit) - Create modern web projects with minimal setup")
-  .version("0.0.8");
+  .version("0.0.9");
 
 program
   .argument("[project-directory]", "Directory for the new project")
