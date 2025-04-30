@@ -1,7 +1,7 @@
 {
   "name": "waskit-react-ts",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vite",
@@ -15,7 +15,9 @@
     "@tailwindcss/vite": "^4.1.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^4.1.4",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
@@ -26,9 +28,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "gh-pages": "^6.3.0",
-    "globals": "^16.0.0",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.31.1",
-    "vite": "^6.3.3"
+    "globals": "^16.0.0"
   }
 }
