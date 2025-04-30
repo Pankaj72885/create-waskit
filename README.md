@@ -117,9 +117,9 @@ Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and read our [Contributi
 
 Having issues or have suggestions? We'd love to hear from you!
 
-- 🐛 [Open an issue](https://github.com/pankajbepari/create-waskit/issues) for bugs
-- 💡 [Request features](https://github.com/pankajbepari/create-waskit/discussions) 
-- 🆘 [Ask for help](https://github.com/pankajbepari/create-waskit/discussions) in our discussions
+- 🐛 [Open an issue](https://github.com/pankaj72885/create-waskit/issues) for bugs
+- 💡 [Request features](https://github.com/pankaj72885/create-waskit/discussions) 
+- 🆘 [Ask for help](https://github.com/pankaj72885/create-waskit/discussions) in our discussions
 - 📣 [Report security issues](SECURITY.md) directly to maintainers
 
 ## License
