@@ -99,7 +99,7 @@ async function copyDir(src, dest) {
 }
 
 program
-  .version("0.0.5")
+  .version("0.0.6")
   .argument("<project-directory>", "Directory for the new project")
   .action(createProject);
 
