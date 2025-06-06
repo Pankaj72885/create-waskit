@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 import { program } from "commander";
 import path from "path";
 import inquirer from "inquirer";
@@ -12,8 +14,22 @@ import chalk from "chalk";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// CORRECTED PATH: Go up one level from 'bin' to the project root to find the 'templates' folder.
-const TEMPLATES_DIR = path.resolve(__dirname, "..", "templates");
+// ROBUST PATHING: Find the project root by locating the 'package.json' relative to this script.
+// This is foolproof and works regardless of how the script is run.
+const findProjectRoot = () => {
+  let currentDir = __dirname;
+  while (!existsSync(path.join(currentDir, "..", "package.json"))) {
+    currentDir = path.join(currentDir, "..");
+    if (currentDir === path.dirname(currentDir)) {
+      // Reached the filesystem root
+      throw new Error("Could not find project root. Is package.json missing?");
+    }
+  }
+  return path.join(currentDir, "..");
+};
+
+const PROJECT_ROOT = findProjectRoot();
+const TEMPLATES_DIR = path.join(PROJECT_ROOT, "templates");
 let templatesConfig = {};
 
 // --- Helper & Logging Functions ---
@@ -31,8 +47,7 @@ const log = {
  */
 async function loadTemplatesConfig() {
   try {
-    // CORRECTED PATH: Looks for templates.json in the same 'bin' directory as this script.
-    const configPath = path.resolve(__dirname, "templates.json");
+    const configPath = path.join(PROJECT_ROOT, "bin", "templates.json");
     if (!existsSync(configPath)) {
       log.error(
         "❌ Critical Error: templates.json not found in the 'bin' directory!"
@@ -147,7 +162,7 @@ async function copyTemplateFiles(templateName, projectPath) {
   const templateDir = path.join(TEMPLATES_DIR, templateName);
   if (!existsSync(templateDir)) {
     log.error(
-      `❌ Template directory "${templateName}" not found. Please check your templates.json and folder structure.`
+      `❌ Template directory "${templateName}" not found. Calculated path: ${templateDir}`
     );
     process.exit(1);
   }
@@ -347,7 +362,7 @@ async function main() {
   program
     .name("create-waskit")
     .description("A modern web project generator for the discerning developer.")
-    .version("0.0.24"); // Version bump for the fix
+    .version("1.0.6");
 
   program
     .argument("[project-directory]", "The directory for the new project")
