@@ -57,10 +57,12 @@ async function copyDir(src, dest) {
 }
 
 /**
- * Removes Tailwind CSS from the project.
+ * Removes Tailwind CSS related code from project files.
  * @param {string} projectDirectory - The project directory.
  */
-async function removeTailwind(projectDirectory) {
+async function removeTailwindCode(projectDirectory) {
+  console.log("\n🧹 Removing Tailwind CSS code from files...");
+  // ... (rest of the function is the same, just renamed for clarity)
   const cssPaths = [
     path.join(projectDirectory, "src", "index.css"),
     path.join(projectDirectory, "src", "style.css"),
@@ -71,7 +73,7 @@ async function removeTailwind(projectDirectory) {
       let content = await fs.readFile(cssPath, "utf8");
       content = content.replace(/@import ['"]tailwindcss['"];?/g, "");
       await fs.writeFile(cssPath, content);
-      console.log(`✅ Removed Tailwind CSS from ${path.basename(cssPath)}`);
+      console.log(`✅ Cleaned up ${path.basename(cssPath)}`);
     }
   }
 
@@ -80,10 +82,9 @@ async function removeTailwind(projectDirectory) {
     let content = await fs.readFile(htmlPath, "utf8");
     content = content.replace(/class=".*?"/g, "");
     await fs.writeFile(htmlPath, content);
-    console.log("✅ Removed Tailwind CSS classes from index.html");
+    console.log("✅ Cleaned up index.html");
   }
 
-  // More robustly find vite config
   const viteConfig = (await fs.readdir(projectDirectory)).find((file) =>
     file.startsWith("vite.config.")
   );
@@ -98,7 +99,7 @@ async function removeTailwind(projectDirectory) {
     content = content.replace(/tailwindcss\(\),?/g, "");
     content = content.replace(/plugins: \[\s*,\s*\]/g, "plugins: []");
     await fs.writeFile(viteConfigPath, content);
-    console.log(`✅ Removed Tailwind CSS plugin from ${viteConfig}`);
+    console.log(`✅ Cleaned up ${viteConfig}`);
   }
 }
 
@@ -166,28 +167,58 @@ const createProject = async (projectDirectory, options) => {
     }
 
     console.log(`\n📁 Creating project "${projectName}"...`);
-    if (!existsSync(absoluteProjectPath)) {
-      mkdirSync(absoluteProjectPath, { recursive: true });
-    }
     await copyDir(templateDir, absoluteProjectPath);
 
+    // Always handle .gitignore
+    const gitignoreTemplatePath = path.join(
+      absoluteProjectPath,
+      "gitignore.template"
+    );
+    if (existsSync(gitignoreTemplatePath)) {
+      await fs.rename(
+        gitignoreTemplatePath,
+        path.join(absoluteProjectPath, ".gitignore")
+      );
+      console.log("✅ Created .gitignore file");
+    }
+
+    // Modify package.json and clean up files
     const packageJsonPath = path.join(absoluteProjectPath, "package.json");
     if (existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(
         await fs.readFile(packageJsonPath, "utf8")
       );
       packageJson.name = projectName;
+
       if (!cssFramework) {
-        delete packageJson.devDependencies["tailwindcss"];
-        delete packageJson.devDependencies["postcss"];
-        delete packageJson.devDependencies["autoprefixer"];
+        // Remove Tailwind-related dependencies and config file
+        const tailwindDeps = [
+          "tailwindcss",
+          "postcss",
+          "autoprefixer",
+          "prettier",
+          "prettier-plugin-tailwindcss",
+          "@tailwindcss/vite",
+        ];
+
+        console.log("\n🧹 Removing Tailwind CSS dependencies...");
+        if (packageJson.devDependencies) {
+          for (const dep of tailwindDeps) {
+            delete packageJson.devDependencies[dep];
+          }
+        }
+
+        const prettierrcPath = path.join(absoluteProjectPath, ".prettierrc");
+        if (existsSync(prettierrcPath)) {
+          await fs.unlink(prettierrcPath);
+        }
       }
+
       await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
     }
 
     if (!cssFramework) {
-      console.log("\n🧹 Removing Tailwind CSS...");
-      await removeTailwind(absoluteProjectPath);
+      await removeTailwindCode(absoluteProjectPath);
     }
 
     if (options.git) {
@@ -244,7 +275,7 @@ const listTemplates = async () => {
 program
   .name("create-waskit")
   .description("Create modern web projects with minimal setup")
-  .version("0.0.16"); // Bumped version for new feature
+  .version("0.0.17"); // Bumped version for new features
 
 program
   .argument("[project-directory]", "Directory for the new project")
@@ -255,7 +286,6 @@ program
   .action(async (projectDirectory, options) => {
     let dir = projectDirectory;
 
-    // If no project directory is provided, prompt the user for it.
     if (!dir) {
       const { newProjectDirectory } = await inquirer.prompt([
         {
@@ -263,7 +293,6 @@ program
           name: "newProjectDirectory",
           message: "What is the name of your new project?",
           validate: (input) => {
-            // Basic validation to ensure the directory name isn't empty.
             if (input.trim()) return true;
             return "Project name cannot be empty.";
           },
@@ -272,8 +301,6 @@ program
       dir = newProjectDirectory.trim();
     }
 
-    // Call createProject. It will handle the rest, including
-    // prompting for language/framework if no template is specified.
     await createProject(dir, options);
   });
 
