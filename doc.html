@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WASKit Documentation</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+      // Enable dark mode by default
+      document.documentElement.classList.add("dark");
+    </script>
+    <meta name="color-scheme" content="dark light" />
+  </head>
+  <body
+    class="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-800 text-gray-100 min-h-screen font-sans"
+  >
+    <nav
+      class="sticky top-0 z-10 bg-gray-950/90 backdrop-blur border-b border-gray-800 shadow-sm mb-8"
+    >
+      <div
+        class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <span
+          class="text-xl sm:text-2xl font-extrabold text-blue-400 tracking-tight"
+          >WASKit <span class="text-gray-400 font-normal">Docs</span></span
+        >
+        <a
+          href="https://github.com/pankaj72885/create-waskit"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-1 text-blue-300 hover:text-blue-400 transition-colors font-medium text-sm sm:text-base"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.78 2.73 1.27 3.4.97.11-.75.41-1.27.74-1.56-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 2.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.41-5.27 5.7.42.36.79 1.09.79 2.2 0 1.59-.01 2.87-.01 3.26 0 .31.21.68.8.56C20.71 21.39 24 17.08 24 12c0-6.27-5.23-11.5-12-11.5z"
+            />
+          </svg>
+          <span class="hidden sm:inline">GitHub</span>
+        </a>
+      </div>
+    </nav>
+    <main class="max-w-3xl mx-auto px-4 pb-8">
+      <section class="mb-10">
+        <h1 class="text-3xl sm:text-4xl font-extrabold mb-4 text-blue-300">
+          WASKit (Web App Starter Kit)
+        </h1>
+        <p class="text-base sm:text-lg mb-3 text-gray-300">
+          A professional CLI tool to scaffold modern web projects with Vite,
+          Tailwind CSS, and flexible templates for JavaScript/TypeScript
+          (Vanilla or React).
+        </p>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <span
+            class="bg-blue-900/60 text-blue-200 px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+            >Vite</span
+          >
+          <span
+            class="bg-green-900/60 text-green-200 px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+            >Tailwind CSS</span
+          >
+          <span
+            class="bg-yellow-900/60 text-yellow-200 px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+            >Bun</span
+          >
+          <span
+            class="bg-purple-900/60 text-purple-200 px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+            >React</span
+          >
+          <span
+            class="bg-gray-800/80 text-gray-200 px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+            >TypeScript</span
+          >
+        </div>
+      </section>
+      <section class="mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-2 text-blue-200">
+          Quick Start
+        </h2>
+        <pre
+          class="bg-gray-900/90 text-blue-100 rounded-lg p-4 overflow-x-auto text-xs sm:text-sm mb-2"
+        ><code>bun create waskit my-app
+cd my-app
+bun run dev</code></pre>
+        <p class="text-xs sm:text-sm text-gray-400">
+          Or use <span class="font-mono">npm create waskit my-app</span> if you
+          prefer npm.
+        </p>
+      </section>
+      <section class="mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-2 text-blue-200">
+          Features
+        </h2>
+        <ul class="list-disc ml-5 space-y-1 text-gray-300 text-sm sm:text-base">
+          <li>Blazing fast project scaffolding</li>
+          <li>Modern tech stack: Vite, Tailwind CSS, React, TypeScript</li>
+          <li>Flexible templates: Vanilla/React × JS/TS</li>
+          <li>Smart dependency management (Bun/NPM)</li>
+          <li>Optional Tailwind CSS integration</li>
+          <li>Git integration (optional)</li>
+        </ul>
+      </section>
+      <section class="mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-2 text-blue-200">
+          Available Templates
+        </h2>
+        <div
+          class="overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/80 shadow"
+        >
+          <table class="min-w-full text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-gray-800/80">
+                <th
+                  class="px-3 py-2 border-b border-gray-700 text-left font-semibold text-gray-300"
+                >
+                  Template
+                </th>
+                <th
+                  class="px-3 py-2 border-b border-gray-700 text-left font-semibold text-gray-300"
+                >
+                  Tech Stack
+                </th>
+                <th
+                  class="px-3 py-2 border-b border-gray-700 text-left font-semibold text-gray-300"
+                >
+                  Use Case
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="hover:bg-gray-800/60 transition">
+                <td class="px-3 py-2 border-b border-gray-800">
+                  Vanilla JavaScript
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  HTML + JS + Tailwind (optional)
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  Lightweight projects
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-800/60 transition">
+                <td class="px-3 py-2 border-b border-gray-800">
+                  Vanilla TypeScript
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  HTML + TS + Tailwind (optional)
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  Type-safe vanilla projects
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-800/60 transition">
+                <td class="px-3 py-2 border-b border-gray-800">
+                  React JavaScript
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  React 19 + JSX + Tailwind (optional)
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  Modern React apps
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-800/60 transition">
+                <td class="px-3 py-2 border-b border-gray-800">
+                  React TypeScript
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  React 19 + TSX + Tailwind (optional)
+                </td>
+                <td class="px-3 py-2 border-b border-gray-800">
+                  Scalable type-safe React apps
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-2 text-blue-200">
+          CLI Usage
+        </h2>
+        <pre
+          class="bg-gray-900/90 text-blue-100 rounded-lg p-4 overflow-x-auto text-xs sm:text-sm mb-2"
+        ><code>create-waskit &lt;project-directory&gt; [options]</code></pre>
+        <ul class="list-disc ml-5 space-y-1 text-gray-300 text-sm sm:text-base">
+          <li>
+            <span class="font-mono">-f, --force</span> — Overwrite target
+            directory if it exists
+          </li>
+          <li>
+            <span class="font-mono">-s, --skip-install</span> — Skip dependency
+            installation
+          </li>
+          <li>
+            <span class="font-mono">-g, --git</span> — Initialize git repository
+          </li>
+          <li>
+            <span class="font-mono">-t, --template &lt;template&gt;</span> —
+            Specify a template (e.g., react-typescript)
+          </li>
+          <li>
+            <span class="font-mono">list</span> — List all available templates
+          </li>
+        </ul>
+      </section>
+      <section class="mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-2 text-blue-200">
+          System Requirements
+        </h2>
+        <ul class="list-disc ml-5 space-y-1 text-gray-300 text-sm sm:text-base">
+          <li>Bun v1.0+ (recommended)</li>
+          <li>Node.js v18.0+ (if using npm)</li>
+          <li>npm v8.0+ (if not using Bun)</li>
+        </ul>
+      </section>
+      <section class="mb-8">
+        <h2 class="text-xl sm:text-2xl font-semibold mb-2 text-blue-200">
+          Contributing
+        </h2>
+        <p class="text-gray-300 text-sm sm:text-base">
+          We welcome contributions! Please fork the repo, create a feature
+          branch, and submit a pull request.
+        </p>
+      </section>
+      <footer class="text-center text-gray-500 py-8 text-xs sm:text-sm">
+        <p>MIT License &copy; 2025 Pankaj Bepari</p>
+        <div
+          class="mt-2 flex flex-col sm:flex-row gap-1 sm:gap-4 items-center justify-center"
+        >
+          <span class="inline-flex items-center gap-1">
+            <!-- Modern email icon -->
+            <svg
+              class="w-4 h-4 text-blue-300"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M2.94 4.94A2.5 2.5 0 0 1 4.5 4h11a2.5 2.5 0 0 1 1.56.56l-7.06 6.18a1 1 0 0 1-1.28 0L2.94 4.94zm14.56 1.32-6.6 5.78a3 3 0 0 1-3.8 0l-6.6-5.78A2.5 2.5 0 0 0 2 6.5v7A2.5 2.5 0 0 0 4.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-7a2.5 2.5 0 0 0-.5-1.24z"
+              />
+            </svg>
+            <a
+              href="mailto:pankajbepari7@gmail.com"
+              class="hover:underline text-blue-200"
+              >pankajbepari7@gmail.com</a
+            >
+          </span>
+          <span class="inline-flex items-center gap-1">
+            <!-- Modern WhatsApp icon -->
+            <svg
+              class="w-4 h-4 text-green-400"
+              fill="currentColor"
+              viewBox="0 0 32 32"
+            >
+              <path
+                d="M16 3C9.373 3 4 8.373 4 15c0 2.637.86 5.08 2.36 7.09L4 29l7.18-2.32A12.93 12.93 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22.5c-1.98 0-3.91-.52-5.6-1.5l-.4-.23-4.13 1.34 1.36-4.02-.26-.41A9.97 9.97 0 1 1 26 15c0 5.514-4.486 10-10 10zm5.13-7.47c-.28-.14-1.65-.81-1.9-.9-.25-.09-.43-.14-.61.14-.18.28-.7.9-.86 1.08-.16.18-.32.2-.6.07-.28-.14-1.18-.43-2.25-1.36-.83-.74-1.39-1.65-1.56-1.93-.16-.28-.02-.43.12-.57.13-.13.28-.34.42-.51.14-.17.18-.29.28-.48.09-.19.05-.36-.02-.5-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.47-.16-.01-.35-.01-.54-.01-.19 0-.5.07-.76.36-.26.29-1 1-.97 2.43.03 1.43 1.03 2.81 1.18 3.01.15.2 2.03 3.1 5.01 4.22.7.24 1.25.38 1.68.48.71.15 1.36.13 1.87.08.57-.06 1.75-.72 2-1.41.25-.69.25-1.28.18-1.41-.07-.13-.25-.2-.53-.34z"
+              />
+            </svg>
+            <a
+              href="https://wa.me/8801780079749"
+              target="_blank"
+              rel="noopener"
+              class="hover:underline text-green-200"
+              >Chat on WhatsApp</a
+            >
+          </span>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

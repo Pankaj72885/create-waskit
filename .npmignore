@@ -17,3 +17,6 @@ yarn.lock
 
 # Ignore other files
 .DS_Store
+
+# ignore doc.html
+doc.html
