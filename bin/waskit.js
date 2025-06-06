@@ -8,15 +8,42 @@ import { existsSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import fs from "fs/promises";
+import chalk from "chalk"; // For colored output
 
-// Get __dirname equivalent in ES modules
+// --- Configuration & Setup ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// --- Configuration ---
-const TEMPLATES_DIR = path.resolve(__dirname, "..", "templates");
+const TEMPLATES_DIR = path.resolve(__dirname, "templates");
+let templatesConfig = {};
 
-// --- Helper Functions ---
+// --- Helper & Logging Functions ---
+
+const log = {
+  info: (msg) => console.log(chalk.blue(msg)),
+  success: (msg) => console.log(chalk.green(msg)),
+  warn: (msg) => console.log(chalk.yellow(msg)),
+  error: (msg) => console.error(chalk.red(msg)),
+  message: (msg) => console.log(msg),
+};
+
+/**
+ * Loads the template configuration from templates.json.
+ */
+async function loadTemplatesConfig() {
+  try {
+    const configPath = path.resolve(__dirname, "templates.json");
+    if (!existsSync(configPath)) {
+      log.error("❌ Critical Error: templates.json not found!");
+      process.exit(1);
+    }
+    const configData = await fs.readFile(configPath, "utf8");
+    templatesConfig = JSON.parse(configData);
+  } catch (err) {
+    log.error(`❌ Critical Error loading templates.json: ${err.message}`);
+    process.exit(1);
+  }
+}
 
 /**
  * Checks if Bun is the current runtime.
@@ -36,7 +63,7 @@ const spawn = (command, args, cwd) => {
 };
 
 /**
- * Copies a directory recursively.
+ * Copies a directory recursively, skipping specified files.
  * @param {string} src - The source directory.
  * @param {string} dest - The destination directory.
  */
@@ -56,63 +83,205 @@ async function copyDir(src, dest) {
   }
 }
 
-/**
- * Removes Tailwind CSS related code from project files.
- * @param {string} projectDirectory - The project directory.
- */
-async function removeTailwindCode(projectDirectory) {
-  console.log("\n🧹 Removing Tailwind CSS code from files...");
-  const cssPaths = [
-    path.join(projectDirectory, "src", "index.css"),
-    path.join(projectDirectory, "src", "style.css"),
-  ];
+// --- Core Project Creation Functions ---
 
-  for (const cssPath of cssPaths) {
-    if (existsSync(cssPath)) {
-      let content = await fs.readFile(cssPath, "utf8");
-      content = content.replace(/@import ['"]tailwindcss['"];?/g, "");
-      await fs.writeFile(cssPath, content);
-      console.log(`✅ Cleaned up ${path.basename(cssPath)}`);
+/**
+ * Prompts the user for any missing required options.
+ * @param {string|undefined} projectDirectory
+ * @param {Object} options
+ * @returns {Promise<{projectDirectory: string, template: string, cssFramework: boolean}>}
+ */
+async function promptForMissingOptions(projectDirectory, options) {
+  let dir = projectDirectory;
+  let template = options.template;
+  let cssFramework = options.template ? true : undefined;
+
+  if (!dir) {
+    const { newDir } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "newDir",
+        message: "What is the name of your new project?",
+        validate: (input) =>
+          input.trim() ? true : "Project name cannot be empty.",
+      },
+    ]);
+    dir = newDir.trim();
+  }
+
+  if (!template) {
+    const { selectedTemplate, selectedCss } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "selectedTemplate",
+        message: "Select a project template:",
+        choices: Object.entries(templatesConfig.templates).map(
+          ([key, { name }]) => ({
+            name: name,
+            value: key,
+          })
+        ),
+      },
+      {
+        type: "confirm",
+        name: "selectedCss",
+        message: "Include Tailwind CSS?",
+        default: true,
+      },
+    ]);
+    template = selectedTemplate;
+    cssFramework = selectedCss;
+  }
+
+  return { projectDirectory: dir, template, cssFramework };
+}
+
+/**
+ * Copies template files to the destination project directory.
+ * @param {string} templateName - The name of the template.
+ * @param {string} projectPath - The absolute path to the project.
+ */
+async function copyTemplateFiles(templateName, projectPath) {
+  const templateDir = path.join(TEMPLATES_DIR, templateName);
+  if (!existsSync(templateDir)) {
+    log.error(
+      `❌ Template directory "${templateName}" not found. Please check your templates.json and folder structure.`
+    );
+    process.exit(1);
+  }
+  log.info(`\n📁 Creating project from template: ${templateName}...`);
+  await copyDir(templateDir, projectPath);
+
+  // Handle .gitignore renaming
+  const gitignoreTemplatePath = path.join(projectPath, "gitignore.template");
+  if (existsSync(gitignoreTemplatePath)) {
+    await fs.rename(
+      gitignoreTemplatePath,
+      path.join(projectPath, ".gitignore")
+    );
+    log.success("✅ Created .gitignore file.");
+  }
+}
+
+/**
+ * Updates the project's package.json with the project name and cleans dependencies.
+ * @param {string} projectPath - The absolute path to the project.
+ * @param {string} projectName - The name of the project.
+ * @param {boolean} useTailwind - Whether to keep or remove Tailwind dependencies.
+ */
+async function updatePackageJson(projectPath, projectName, useTailwind) {
+  const packageJsonPath = path.join(projectPath, "package.json");
+  if (!existsSync(packageJsonPath)) {
+    log.warn(
+      "⚠️ No package.json found in the template. Skipping modification."
+    );
+    return;
+  }
+
+  const packageJson = JSON.parse(await fs.readFile(packageJsonPath, "utf8"));
+  packageJson.name = projectName;
+
+  if (!useTailwind) {
+    log.info("🧹 Removing Tailwind CSS dependencies from package.json...");
+    const tailwindDeps = templatesConfig.tailwind?.dependencies || [];
+    if (packageJson.devDependencies) {
+      for (const dep of tailwindDeps) {
+        delete packageJson.devDependencies[dep];
+      }
     }
   }
 
-  const htmlPath = path.join(projectDirectory, "index.html");
+  await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
+  log.success("✅ Updated package.json.");
+}
+
+/**
+ * Removes Tailwind-related files and code from the project.
+ * @param {string} projectPath - The absolute path to the project.
+ */
+async function cleanupTailwindFiles(projectPath) {
+  log.info("🧹 Removing Tailwind CSS configuration and code...");
+
+  // Remove .prettierrc if it exists
+  const prettierrcPath = path.join(projectPath, ".prettierrc");
+  if (existsSync(prettierrcPath)) {
+    await fs.unlink(prettierrcPath);
+    log.success("✅ Removed .prettierrc.");
+  }
+
+  // Clean CSS files
+  for (const cssFile of templatesConfig.tailwind?.cssFiles || []) {
+    const cssPath = path.join(projectPath, "src", cssFile);
+    if (existsSync(cssPath)) {
+      let content = await fs.readFile(cssPath, "utf8");
+      content = content
+        .replace(/@import ['"]tailwindcss['"];?/g, "")
+        .replace(/@tailwind .*;/g, "");
+      await fs.writeFile(cssPath, content);
+      log.success(`✅ Cleaned ${cssFile}.`);
+    }
+  }
+
+  // Clean index.html
+  const htmlPath = path.join(projectPath, "index.html");
   if (existsSync(htmlPath)) {
     let content = await fs.readFile(htmlPath, "utf8");
     content = content.replace(/class=".*?"/g, "");
     await fs.writeFile(htmlPath, content);
-    console.log("✅ Cleaned up index.html");
-  }
-
-  const viteConfig = (await fs.readdir(projectDirectory)).find((file) =>
-    file.startsWith("vite.config.")
-  );
-
-  if (viteConfig) {
-    const viteConfigPath = path.join(projectDirectory, viteConfig);
-    let content = await fs.readFile(viteConfigPath, "utf8");
-    content = content.replace(
-      /import tailwindcss(?:(?:\/vite))? from ['"](?:@tailwindcss\/vite|tailwindcss(?:(?:\/vite)?))['"];\n?/g,
-      ""
-    );
-    content = content.replace(/tailwindcss\(\),?/g, "");
-    content = content.replace(/plugins: \[\s*,\s*\]/g, "plugins: []");
-    await fs.writeFile(viteConfigPath, content);
-    console.log(`✅ Cleaned up ${viteConfig}`);
+    log.success("✅ Cleaned index.html.");
   }
 }
 
-// --- Core Functions ---
+/**
+ * Initializes a git repository in the project directory.
+ * @param {string} projectPath - The absolute path to the project.
+ */
+function initializeGitRepo(projectPath) {
+  log.info("\n🔄 Initializing git repository...");
+  try {
+    spawn("git", ["init"], projectPath);
+    spawn("git", ["add", "."], projectPath);
+    spawn(
+      "git",
+      ["commit", "-m", "Initial commit from create-waskit"],
+      projectPath
+    );
+    log.success("✅ Git repository initialized successfully.");
+  } catch (error) {
+    log.warn(`⚠️ Could not initialize git repository. Is git installed?`);
+  }
+}
 
 /**
- * Creates a new project.
+ * Installs project dependencies using bun or npm.
+ * @param {string} projectPath - The absolute path to the project.
+ */
+function installDependencies(projectPath) {
+  const manager = isBun() ? "bun" : "npm";
+  log.info(`\n📦 Installing dependencies with ${manager}...`);
+  const result = spawn(manager, ["install"], projectPath);
+  if (result.status !== 0) {
+    log.error(
+      `❌ Dependency installation failed. Please run '${manager} install' manually.`
+    );
+  } else {
+    log.success("✅ Dependencies installed successfully.");
+  }
+}
+
+/**
+ * The main function to create a project.
  * @param {string} projectDirectory - The directory for the new project.
  * @param {Object} options - Command-line options.
  */
 const createProject = async (projectDirectory, options) => {
   try {
-    const projectName = path.basename(path.resolve(projectDirectory));
-    const absoluteProjectPath = path.resolve(process.cwd(), projectDirectory);
+    const userInput = await promptForMissingOptions(projectDirectory, options);
+    const { template, cssFramework } = userInput;
+    const finalProjectDir = userInput.projectDirectory;
+
+    const projectName = path.basename(path.resolve(finalProjectDir));
+    const absoluteProjectPath = path.resolve(process.cwd(), finalProjectDir);
 
     if (existsSync(absoluteProjectPath) && !options.force) {
       const { overwrite } = await inquirer.prompt([
@@ -124,188 +293,77 @@ const createProject = async (projectDirectory, options) => {
         },
       ]);
       if (!overwrite) {
-        console.log("Project creation cancelled.");
+        log.message("Project creation cancelled.");
         return;
       }
     }
 
-    let { template } = options;
-    let cssFramework = true;
-
-    if (!template) {
-      const answers = await inquirer.prompt([
-        {
-          type: "list",
-          name: "language",
-          message: "Select a language:",
-          choices: ["JavaScript", "TypeScript"],
-        },
-        {
-          type: "list",
-          name: "framework",
-          message: "Select a framework:",
-          choices: ["Vanilla", "React"],
-        },
-        {
-          type: "confirm",
-          name: "cssFramework",
-          message: "Include Tailwind CSS?",
-          default: true,
-        },
-      ]);
-      template = `${answers.framework.toLowerCase()}-${answers.language.toLowerCase()}`;
-      cssFramework = answers.cssFramework;
-    }
-
-    const templateDir = path.join(TEMPLATES_DIR, template);
-    if (!existsSync(templateDir)) {
-      console.error(
-        `❌ Template "${template}" not found. Try 'create-waskit list'.`
-      );
-      return;
-    }
-
-    console.log(`\n📁 Creating project "${projectName}"...`);
-    await copyDir(templateDir, absoluteProjectPath);
-
-    // Always handle .gitignore
-    const gitignoreTemplatePath = path.join(
-      absoluteProjectPath,
-      "gitignore.template"
-    );
-    if (existsSync(gitignoreTemplatePath)) {
-      await fs.rename(
-        gitignoreTemplatePath,
-        path.join(absoluteProjectPath, ".gitignore")
-      );
-      console.log("✅ Created .gitignore file");
-    }
-
-    // Modify package.json and clean up files
-    const packageJsonPath = path.join(absoluteProjectPath, "package.json");
-    if (existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(
-        await fs.readFile(packageJsonPath, "utf8")
-      );
-      packageJson.name = projectName;
-
-      if (!cssFramework) {
-        // Remove Tailwind-related dependencies and config file
-        const tailwindDeps = [
-          "tailwindcss",
-          "postcss",
-          "autoprefixer",
-          "prettier",
-          "prettier-plugin-tailwindcss",
-          "@tailwindcss/vite",
-        ];
-
-        console.log("\n🧹 Removing Tailwind CSS dependencies...");
-        if (packageJson.devDependencies) {
-          for (const dep of tailwindDeps) {
-            delete packageJson.devDependencies[dep];
-          }
-        }
-
-        const prettierrcPath = path.join(absoluteProjectPath, ".prettierrc");
-        if (existsSync(prettierrcPath)) {
-          await fs.unlink(prettierrcPath);
-        }
-      }
-
-      await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
-    }
+    await copyTemplateFiles(template, absoluteProjectPath);
+    await updatePackageJson(absoluteProjectPath, projectName, cssFramework);
 
     if (!cssFramework) {
-      await removeTailwindCode(absoluteProjectPath);
+      await cleanupTailwindFiles(absoluteProjectPath);
     }
 
     if (options.git) {
-      console.log("\n🔄 Initializing git repository...");
-      if (spawn("git", ["init"], absoluteProjectPath).status === 0) {
-        spawn("git", ["add", "."], absoluteProjectPath);
-        spawn("git", ["commit", "-m", "Initial commit"], absoluteProjectPath);
-        console.log("✅ Git repository initialized.");
-      } else {
-        console.warn("⚠️ Git initialization failed. Is git installed?");
-      }
+      initializeGitRepo(absoluteProjectPath);
     }
 
     if (!options.skipInstall) {
-      console.log("\n📦 Installing dependencies...");
-      const manager = isBun() ? "bun" : "npm";
-      if (spawn(manager, ["install"], absoluteProjectPath).status !== 0) {
-        console.error(`❌ Failed to install dependencies with ${manager}.`);
-      } else {
-        console.log("✅ Dependencies installed.");
-      }
+      installDependencies(absoluteProjectPath);
     }
 
-    console.log("\n🎉 Project setup complete! Next steps:");
-    console.log(`  cd ${projectDirectory}`);
-    console.log(`  ${isBun() ? "bun" : "npm"} run dev`);
+    log.success("\n🎉 Project setup complete! Your journey begins now.");
+    log.message(`\nNext steps:\n`);
+    log.message(`  cd ${finalProjectDir}`);
+    log.message(`  ${isBun() ? "bun" : "npm"} run dev\n`);
   } catch (error) {
-    console.error(`\n❌ An error occurred: ${error.message}`);
+    log.error(`\n❌ An unexpected error occurred: ${error.message}`);
+    process.exit(1);
   }
 };
 
 /**
- * Lists available templates.
+ * Lists available templates from the configuration file.
  */
 const listTemplates = async () => {
-  try {
-    if (!existsSync(TEMPLATES_DIR)) {
-      console.error("❌ Templates directory not found.");
-      return;
-    }
-    const dirents = await fs.readdir(TEMPLATES_DIR, { withFileTypes: true });
-    const templates = dirents
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
-
-    console.log("\n📋 Available templates:");
-    templates.forEach((template) => console.log(`  - ${template}`));
-  } catch (error) {
-    console.error(`\n❌ Error listing templates: ${error.message}`);
+  log.info("\n📋 Available Templates:");
+  for (const [key, { name, description }] of Object.entries(
+    templatesConfig.templates
+  )) {
+    log.message(`  - ${chalk.cyan(key)}: ${name}`);
+    log.message(`    ${description}`);
   }
+  log.message("\nTo create a project using a template, run:");
+  log.message("  create-waskit <project-directory> -t <template-name>\n");
 };
 
-// --- CLI Setup ---
-program
-  .name("create-waskit")
-  .description("Create modern web projects with minimal setup")
-  .version("0.0.18"); // Bumped version for documentation
+// --- CLI Setup & Execution ---
+async function main() {
+  await loadTemplatesConfig();
 
-program
-  .argument("[project-directory]", "Directory for the new project")
-  .option("-f, --force", "Overwrite the target directory if it exists")
-  .option("-s, --skip-install", "Skip dependency installation")
-  .option("-g, --git", "Initialize a git repository")
-  .option("-t, --template <template>", "Specify a template to use")
-  .action(async (projectDirectory, options) => {
-    let dir = projectDirectory;
+  program
+    .name("create-waskit")
+    .description("A modern web project generator for the discerning developer.")
+    .version("1.0.0");
 
-    if (!dir) {
-      const { newProjectDirectory } = await inquirer.prompt([
-        {
-          type: "input",
-          name: "newProjectDirectory",
-          message: "What is the name of your new project?",
-          validate: (input) => {
-            if (input.trim()) return true;
-            return "Project name cannot be empty.";
-          },
-        },
-      ]);
-      dir = newProjectDirectory.trim();
-    }
+  program
+    .argument("[project-directory]", "The directory for the new project")
+    .option("-f, --force", "Overwrite the target directory if it exists")
+    .option("-s, --skip-install", "Skip dependency installation")
+    .option("-g, --git", "Initialize a git repository")
+    .option("-t, --template <template>", "Specify a template to use directly")
+    .action(createProject);
 
-    await createProject(dir, options);
-  });
+  program
+    .command("list")
+    .description("List all available project templates")
+    .action(listTemplates);
 
-program
-  .command("list")
-  .description("List all available templates")
-  .action(listTemplates);
+  program.parse(process.argv);
+}
 
-program.parse(process.argv);
+main().catch((err) => {
+  log.error(`A critical error occurred: ${err.message}`);
+  process.exit(1);
+});

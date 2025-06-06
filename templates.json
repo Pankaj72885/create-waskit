@@ -1,0 +1,29 @@
+{
+  "templates": {
+    "react-javascript": {
+      "name": "React (JavaScript)",
+      "description": "A classic React project using JavaScript and Vite."
+    },
+    "react-typescript": {
+      "name": "React (TypeScript)",
+      "description": "A robust React project using TypeScript and Vite."
+    },
+    "vanilla-javascript": {
+      "name": "Vanilla (JavaScript)",
+      "description": "A lightweight, standard JavaScript project using Vite."
+    },
+    "vanilla-typescript": {
+      "name": "Vanilla (TypeScript)",
+      "description": "A type-safe vanilla project using TypeScript and Vite."
+    }
+  },
+  "tailwind": {
+    "dependencies": [
+      "tailwindcss",
+      "prettier",
+      "prettier-plugin-tailwindcss",
+      "@tailwindcss/vite"
+    ],
+    "cssFiles": ["index.css", "style.css"]
+  }
+}
