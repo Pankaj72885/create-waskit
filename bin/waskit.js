@@ -389,7 +389,7 @@ async function main() {
   program
     .name("create-waskit")
     .description("A modern web project generator for the discerning developer.")
-    .version("0.1.1"); // Version bump for new features
+    .version("0.1.2"); // Version bump for new features
 
   program
     .argument("[project-directory]", "The directory for the new project")
