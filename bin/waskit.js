@@ -9,23 +9,23 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import fs from "fs/promises";
 import chalk from "chalk";
+import Table from "cli-table3"; // NEW: For pretty table output
 
 // --- Configuration & Setup ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// ROBUST PATHING: Find the project root by locating the 'package.json' relative to this script.
-// This is foolproof and works regardless of how the script is run.
+// This robust pathing finds the project root relative to this script.
 const findProjectRoot = () => {
   let currentDir = __dirname;
-  while (!existsSync(path.join(currentDir, "..", "package.json"))) {
-    currentDir = path.join(currentDir, "..");
-    if (currentDir === path.dirname(currentDir)) {
-      // Reached the filesystem root
-      throw new Error("Could not find project root. Is package.json missing?");
-    }
+  // We look for the 'package.json' in the parent directory of the 'bin' folder.
+  const expectedRoot = path.resolve(currentDir, "..");
+  if (existsSync(path.join(expectedRoot, "package.json"))) {
+    return expectedRoot;
   }
-  return path.join(currentDir, "..");
+  throw new Error(
+    "Could not find project root. The script structure might have changed."
+  );
 };
 
 const PROJECT_ROOT = findProjectRoot();
@@ -47,7 +47,7 @@ const log = {
  */
 async function loadTemplatesConfig() {
   try {
-    const configPath = path.join(PROJECT_ROOT, "bin", "templates.json");
+    const configPath = path.join(__dirname, "templates.json");
     if (!existsSync(configPath)) {
       log.error(
         "❌ Critical Error: templates.json not found in the 'bin' directory!"
@@ -166,6 +166,18 @@ async function copyTemplateFiles(templateName, projectPath) {
     );
     process.exit(1);
   }
+
+  // NEW: Enhanced Template Validation
+  const requiredFiles = ["package.json", "index.html", "gitignore.template"];
+  for (const file of requiredFiles) {
+    if (!existsSync(path.join(templateDir, file))) {
+      log.error(
+        `❌ Template "${templateName}" is invalid: it's missing the required file -> ${file}`
+      );
+      process.exit(1);
+    }
+  }
+
   log.info(`\n📁 Creating project from template: ${templateName}...`);
   await copyDir(templateDir, projectPath);
 
@@ -330,10 +342,12 @@ const createProject = async (projectDirectory, options) => {
       installDependencies(absoluteProjectPath);
     }
 
-    log.success("\n🎉 Project setup complete! Your journey begins now.");
-    log.message(`\nNext steps:\n`);
-    log.message(`  cd ${finalProjectDir}`);
-    log.message(`  ${isBun() ? "bun" : "npm"} run dev\n`);
+    // NEW: Refined Success Message
+    log.success("\n🎉 Project setup complete! Your new app is ready.");
+    log.message(`\nTo get started, run the following commands:\n`);
+    log.message(chalk.cyan(`  cd ${finalProjectDir}`));
+    log.message(chalk.cyan(`  ${isBun() ? "bun" : "npm"} run dev`));
+    log.message(`\nHappy coding! ✨`);
   } catch (error) {
     log.error(`\n❌ An unexpected error occurred: ${error.message}`);
     process.exit(1);
@@ -344,15 +358,28 @@ const createProject = async (projectDirectory, options) => {
  * Lists available templates from the configuration file.
  */
 const listTemplates = async () => {
+  // NEW: Improved 'list' command output
+  const table = new Table({
+    head: [
+      chalk.cyan("Template ID"),
+      chalk.cyan("Name"),
+      chalk.cyan("Description"),
+    ],
+    colWidths: [22, 22, 55],
+    style: { head: [], border: [] }, // clean style
+  });
+
   log.info("\n📋 Available Templates:");
   for (const [key, { name, description }] of Object.entries(
     templatesConfig.templates
   )) {
-    log.message(`  - ${chalk.cyan(key)}: ${name}`);
-    log.message(`    ${description}`);
+    table.push([key, name, description]);
   }
+
+  log.message(table.toString());
+
   log.message("\nTo create a project using a template, run:");
-  log.message("  create-waskit <project-directory> -t <template-name>\n");
+  log.message("  create-waskit <project-directory> -t <template-id>\n");
 };
 
 // --- CLI Setup & Execution ---
@@ -362,7 +389,7 @@ async function main() {
   program
     .name("create-waskit")
     .description("A modern web project generator for the discerning developer.")
-    .version("0.0.26");
+    .version("0.1.0"); // Version bump for new features
 
   program
     .argument("[project-directory]", "The directory for the new project")
