@@ -62,7 +62,6 @@ async function copyDir(src, dest) {
  */
 async function removeTailwindCode(projectDirectory) {
   console.log("\n🧹 Removing Tailwind CSS code from files...");
-  // ... (rest of the function is the same, just renamed for clarity)
   const cssPaths = [
     path.join(projectDirectory, "src", "index.css"),
     path.join(projectDirectory, "src", "style.css"),
@@ -275,7 +274,7 @@ const listTemplates = async () => {
 program
   .name("create-waskit")
   .description("Create modern web projects with minimal setup")
-  .version("0.0.17"); // Bumped version for new features
+  .version("0.0.18"); // Bumped version for documentation
 
 program
   .argument("[project-directory]", "Directory for the new project")
