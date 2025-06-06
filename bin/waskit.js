@@ -4,7 +4,7 @@ import { program } from "commander";
 import path from "path";
 import inquirer from "inquirer";
 import { spawnSync } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import fs from "fs/promises";
@@ -244,7 +244,7 @@ const listTemplates = async () => {
 program
   .name("create-waskit")
   .description("Create modern web projects with minimal setup")
-  .version("0.0.15"); // Bumped version for new feature
+  .version("0.0.16"); // Bumped version for new feature
 
 program
   .argument("[project-directory]", "Directory for the new project")
