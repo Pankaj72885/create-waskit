@@ -345,7 +345,7 @@ async function main() {
   program
     .name("create-waskit")
     .description("A modern web project generator for the discerning developer.")
-    .version("0.0.20");
+    .version("0.0.21");
 
   program
     .argument("[project-directory]", "The directory for the new project")
