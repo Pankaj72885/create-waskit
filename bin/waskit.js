@@ -422,7 +422,7 @@ program
   .description(
     "WASKit (Web App Starter Kit) - Create modern web projects with minimal setup"
   )
-  .version("0.0.12");
+  .version("0.0.14");
 
 program
   .argument("[project-directory]", "Directory for the new project")
