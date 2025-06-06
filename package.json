@@ -45,6 +45,7 @@
   "files": [
     "bin",
     "templates",
+    "templates.json",
     "README.md",
     "LICENSE"
   ],
